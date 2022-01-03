@@ -3,10 +3,13 @@ import "./events.css";
 import Modals from "../components/Modals/Modals";
 import Backdrop from "../components/backdrop/backdrop";
 import AuthContext from "../context/auth-context";
+import EventList from "../components/Events/EventsList/EventList";
 class EventsPage extends Component {
   state = {
     createEvent: false,
     events: [],
+    isLoading: false,
+    selectedEvent: null,
   };
 
   static contextType = AuthContext;
@@ -51,10 +54,6 @@ class EventsPage extends Component {
           description
           date
           price
-          creator {
-            _id
-            email
-          }
         }
       }
     `,
@@ -76,16 +75,39 @@ class EventsPage extends Component {
         return res.json();
       })
       .then((resData) => {
-        this.fetchEvents();
+        this.setState((prevState) => {
+          const updatedEvents = [...prevState.events];
+          updatedEvents.push({
+            _id: resData.data.createEvent._id,
+            title: resData.data.createEvent.title,
+            description: resData.data.createEvent.description,
+            date: resData.data.createEvent.date,
+            price: resData.data.createEvent.price,
+            creator: {
+              _id: this.context.userId,
+            },
+          });
+          return { events: updatedEvents };
+        });
       })
       .catch((err) => {
         console.log(err);
       });
   };
   cancelEventHandler = () => {
-    this.setState({ createEvent: false });
+    this.setState({ createEvent: false, selectedEvent: null });
   };
+  showDetailHandler = (eventId) => {
+    this.setState((prevState) => {
+      const selectedEvent = prevState.events.find((e) => e._id === eventId);
+      return { selectedEvent: selectedEvent };
+    });
+  };
+
+  bookEventHandler = () => {};
+
   fetchEvents() {
+    this.setState({ isLoading: true });
     const requestBody = {
       query: `
           query {
@@ -119,24 +141,18 @@ class EventsPage extends Component {
       })
       .then((resData) => {
         const events = resData.data.events;
-        this.setState({ events: events });
+        this.setState({ events: events, isLoading: false });
       })
       .catch((err) => {
+        this.setState({ isLoading: false });
         console.log(err);
       });
   }
 
   render() {
-    const eventList = this.state.events.map((event) => {
-      return (
-        <li className="events-listitem" key={event._id}>
-          {event.title}
-        </li>
-      );
-    });
     return (
       <React.Fragment>
-        {this.state.createEvent && <Backdrop />}
+        {this.state.createEvent || (this.state.selectedEvent && <Backdrop />)}
         {this.state.createEvent && (
           <Modals
             title="Add Event"
@@ -174,6 +190,23 @@ class EventsPage extends Component {
             </form>
           </Modals>
         )}
+        {this.state.selectedEvent && (
+          <Modals
+            title={this.state.selectedEvent.title}
+            canCancel
+            canConfirm
+            onCancel={this.modalCancelHandler}
+            onConfirm={this.bookEventHandler}
+            confirmText="Book"
+          >
+            <h1>{this.state.selectedEvent.title}</h1>
+            <h2>
+              ${this.state.selectedEvent.price} -{" "}
+              {new Date(this.state.selectedEvent.date).toLocaleDateString()}
+            </h2>
+            <p>{this.state.selectedEvent.description}</p>
+          </Modals>
+        )}
         {this.context.token && (
           <div className="events-control">
             <p>Share your own Events</p>
@@ -182,7 +215,15 @@ class EventsPage extends Component {
             </button>
           </div>
         )}
-        <ul className="events-list">{eventList}</ul>
+        {this.state.isLoading ? (
+          <p>This is Loading ...</p>
+        ) : (
+          <EventList
+            events={this.state.events}
+            authUserId={this.context.userid}
+            onViewDetail={this.showDetailHandler}
+          />
+        )}
       </React.Fragment>
     );
   }
