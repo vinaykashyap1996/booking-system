@@ -30,6 +30,9 @@ function App() {
         <main className="main-content">
           <Routes>
             {!token && <Route path="/" element={<Navigate to="/auth" />} />}
+            {!token && (
+              <Route path="/booking" element={<Navigate to="/auth" />} />
+            )}
             {token && <Route path="/" element={<Navigate to="/events" />} />}
             {token && (
               <Route path="/auth" element={<Navigate to="/events" />} />
