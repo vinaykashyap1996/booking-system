@@ -36,3 +36,8 @@ body {
   background: #5101d1;
   border-color: #5101d1;
 }
+
+.spinner {
+  display: flex;
+  justify-content: center;
+}

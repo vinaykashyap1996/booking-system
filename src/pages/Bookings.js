@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import BookingList from "../components/Bookings/BookingList/BookingList";
 import AuthContext from "../context/auth-context";
+import Loader from "react-loader-spinner";
 
 class BookingsPage extends Component {
   state = {
@@ -100,7 +101,16 @@ class BookingsPage extends Component {
     return (
       <React.Fragment>
         {this.state.isLoading ? (
-          <p>This is Loading ...</p>
+          <div className="spinner">
+            <Loader
+              type="Rings"
+              color="#00BFFF"
+              height={100}
+              width={100}
+              timeout={3000}
+            />
+            ,
+          </div>
         ) : (
           <BookingList
             events={this.state.bookings}

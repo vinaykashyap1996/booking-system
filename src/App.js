@@ -20,7 +20,6 @@ function App() {
     setToken(null);
     setUserId(null);
   };
-
   return (
     <BrowserRouter>
       <AuthContext.Provider
