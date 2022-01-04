@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import "./events.css";
+import Loader from "react-loader-spinner";
 import Modals from "../components/Modals/Modals";
 import Backdrop from "../components/backdrop/backdrop";
 import AuthContext from "../context/auth-context";
@@ -131,6 +132,7 @@ class EventsPage extends Component {
         if (res.status !== 200 && res.status !== 201) {
           throw new Error("Failed!");
         }
+        this.setState({ selectedEvent: null });
         return res.json();
       })
       .then((resData) => {
@@ -185,9 +187,10 @@ class EventsPage extends Component {
   }
 
   render() {
+    console.log(this.context);
     return (
       <React.Fragment>
-        {this.state.createEvent || (this.state.selectedEvent && <Backdrop />)}
+        {(this.state.createEvent || this.state.selectedEvent) && <Backdrop />}
         {this.state.createEvent && (
           <Modals
             title="Add Event"
@@ -251,7 +254,9 @@ class EventsPage extends Component {
           </div>
         )}
         {this.state.isLoading ? (
-          <p>This is Loading ...</p>
+          <div className="spinner">
+            <Loader type="Rings" color="#00BFFF" height={100} width={100} />,
+          </div>
         ) : (
           <EventList
             events={this.state.events}

@@ -1,6 +1,9 @@
 import React, { Component } from "react";
 import "./Auth.css";
 import AuthContext from "../context/auth-context";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+toast.configure();
 
 class AuthPage extends Component {
   state = {
@@ -70,10 +73,27 @@ class AuthPage extends Component {
             resData.data.login.userid,
             resData.data.login.TokenExpiration
           );
+          toast.success("Logged In", {
+            position: "bottom-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
         }
       })
       .catch((err) => {
-        console.log(err);
+        toast.error("Error in Logging In", {
+          position: "bottom-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
       });
   };
   render() {
